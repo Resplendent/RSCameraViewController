@@ -175,9 +175,10 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     if ([session canAddOutput:stillOutput])
         [session addOutput:stillOutput];
     
-    CGRect previewFrame = self.view.frame;
     
-    CGRect bounds = self.view.bounds;
+    CGRect previewFrame = CGRectMake(0, 0, 320, 390);
+    
+    CGRect bounds = CGRectMake(0, 70, 320, 390);
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     [previewLayer setFrame:previewFrame];

@@ -8,16 +8,32 @@
 
 #import "RSViewController.h"
 
-@interface RSViewController ()
 
+
+@interface RSViewController ()
+{
+    BOOL isCameraBackfacing;
+}
 @end
 
 @implementation RSViewController
+
+@synthesize videoViewController = _videoViewController;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+
+    _videoViewController = [[RSVideoViewController alloc]initWithNibName:nil bundle:nil];
+    
+    [_videoViewController.view setFrame:CGRectMake(0, 0, 320, 300)];
+    
+    isCameraBackfacing = YES;
+    [self addChildViewController:_videoViewController];
+    [self.view addSubview:_videoViewController.view];
+    
+    
 }
 
 - (void)didReceiveMemoryWarning
