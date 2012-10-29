@@ -76,6 +76,14 @@
     [_button2 addTarget:_videoViewController action:@selector(switchCameras) forControlEvents:UIControlEventTouchUpInside];
     
     [self.view addSubview:_button2];
+    
+    /*
+     
+     Build custom UI Components
+     
+     Buttons, switches, statuses, and add them to self subview
+     
+     */
 }
 
 - (void)didReceiveMemoryWarning

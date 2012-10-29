@@ -178,8 +178,15 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
         [session addOutput:stillOutput];
     
     
+    
+    /*
+     Adjust this to change the size of the preview frame
+     */
     CGRect previewFrame = CGRectMake(0, 0, 320, 390);
     
+    /*
+     Adjust the position of the preview frame
+     */
     CGRect bounds = CGRectMake(0, 70, 320, 390);
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
