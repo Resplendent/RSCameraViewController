@@ -124,7 +124,7 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     return nil;
 }
 
--(void)switchCamerasToFront:(BOOL)isFront
+-(void)switchCameras
 {
     if (!frontCamera)
     {
@@ -143,6 +143,8 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     
     
     isFront ? [session addInput:frontCameraInput]:[session addInput:backCameraInput];
+    
+    isFront = !isFront;
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -189,6 +191,8 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     [self.view.layer addSublayer:previewLayer];
     
     [self doRecycle];
+    
+    isFront = YES;
     
     [super viewDidLoad];
 }

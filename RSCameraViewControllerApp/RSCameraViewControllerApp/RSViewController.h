@@ -10,7 +10,7 @@
 
 #import "RSVideoViewController.h"
 
-@interface RSViewController : UIViewController
+@interface RSViewController : UIViewController <RSVideoViewControllerDelegate>
 
 @property(nonatomic, retain) RSVideoViewController* videoViewController;
 

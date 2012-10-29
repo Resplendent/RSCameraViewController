@@ -29,9 +29,11 @@
     AVCaptureDeviceInput* backCameraInput;
     
     AVCaptureConnection *videoConnection;
+
+    BOOL isFront;
 }
 
--(void)switchCamerasToFront:(BOOL)isFront;
+-(void)switchCameras;
 
 -(void)captureImage;
 
