@@ -20,4 +20,6 @@ It has API's for switching cameras and grabbing a photo, which is informed with 
 	
 ## RACameraViewControllerApp
 
-Has a single view controller which shows the correct implementation of the the RSVideoViewController
+Has a single view controller which shows one possible implementation of a camera which can capture photos and switch lenses (front/back)
+
+Feel free to use this as a starting ground for any camera based app. Do some crazy stuff to photos.
