@@ -18,7 +18,7 @@ It has API's for switching cameras and grabbing a photo, which is informed with 
 	-(void)captureImage;
 	
 	
-## RACameraViewControllerApp
+### RACameraViewControllerApp
 
 Has a single view controller which shows one possible implementation of a camera which can capture photos and switch lenses (front/back)
 
