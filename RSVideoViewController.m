@@ -154,6 +154,7 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
 
 - (void)viewDidLoad
 {
+    [self.view setBackgroundColor:[UIColor clearColor]];
     session = [[AVCaptureSession alloc]init];
     backCamera = [self getBackCamera];
     
@@ -177,17 +178,17 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     if ([session canAddOutput:stillOutput])
         [session addOutput:stillOutput];
     
-    
+    NSLog(@"Right now we got %@", NSStringFromCGRect(self.view.frame));
     
     /*
      Adjust this to change the size of the preview frame
      */
-    CGRect previewFrame = CGRectMake(0, 0, 320, 390);
+    CGRect previewFrame = CGRectMake(0, 0, 320, self.view.frame.size.height - 95);
     
     /*
      Adjust the position of the preview frame
      */
-    CGRect bounds = CGRectMake(0, 70, 320, 390);
+    CGRect bounds = CGRectMake(0, 0, 320, self.view.frame.size.height - 95);
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     [previewLayer setFrame:previewFrame];
