@@ -178,8 +178,6 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     if ([session canAddOutput:stillOutput])
         [session addOutput:stillOutput];
     
-    NSLog(@"Right now we got %@", NSStringFromCGRect(self.view.frame));
-    
     /*
      Adjust this to change the size of the preview frame
      */
