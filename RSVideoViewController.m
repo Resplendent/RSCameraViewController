@@ -208,14 +208,19 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     [super viewDidAppear:animated];
 }
 
--(void)viewWillAppear:(BOOL)animated
-{
-    [stillOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
-}
-
--(void)viewWillDisappear:(BOOL)animated
+-(void)dealloc
 {
     [stillOutput removeObserver:self forKeyPath:@"capturingStillImage"];
+}
+
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self)
+    {
+        [stillOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+    }
+    return self;
 }
 
 - (void)viewDidUnload
