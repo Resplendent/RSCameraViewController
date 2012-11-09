@@ -173,8 +173,7 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     
     stillOutput = [[AVCaptureStillImageOutput alloc]init];
     
-    [stillOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
-    
+
     if ([session canAddOutput:stillOutput])
         [session addOutput:stillOutput];
     
@@ -209,9 +208,18 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     [super viewDidAppear:animated];
 }
 
-- (void)viewDidUnload
+-(void)viewWillAppear:(BOOL)animated
+{
+    [stillOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
+}
+
+-(void)viewWillDisappear:(BOOL)animated
 {
     [stillOutput removeObserver:self forKeyPath:@"capturingStillImage"];
+}
+
+- (void)viewDidUnload
+{
     [session stopRunning];
     [super viewDidUnload];
 }
