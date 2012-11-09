@@ -147,10 +147,10 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     isFront = !isFront;
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-    NSLog(@"Camera Bool State Changed To %@ from %@", [change objectForKey:@"new"], [change objectForKey:@"old"]);
-}
+//-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+//{
+//    NSLog(@"Camera Bool State Changed To %@ from %@", [change objectForKey:@"new"], [change objectForKey:@"old"]);
+//}
 
 - (void)viewDidLoad
 {
@@ -189,7 +189,7 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     [previewLayer setFrame:previewFrame];
-    previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    previewLayer.videoGravity = AVLayerVideoGravityResize;
     previewLayer.bounds = bounds;
     previewLayer.position=CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
     
@@ -208,7 +208,7 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     [super viewDidAppear:animated];
 }
 
--(void)dealloc
+/*-(void)dealloc
 {
     [stillOutput removeObserver:self forKeyPath:@"capturingStillImage"];
 }
@@ -222,6 +222,7 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     }
     return self;
 }
+ */
 
 - (void)viewDidUnload
 {
