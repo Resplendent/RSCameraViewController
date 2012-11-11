@@ -180,12 +180,12 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     /*
      Adjust this to change the size of the preview frame
      */
-    CGRect previewFrame = CGRectMake(0, 0, 320, self.view.frame.size.height - 95);
+    CGRect previewFrame = CGRectMake(0, 0, 320, self.view.frame.size.height);// - 95);
     
     /*
      Adjust the position of the preview frame
      */
-    CGRect bounds = CGRectMake(0, 0, 320, self.view.frame.size.height - 95);
+    CGRect bounds = CGRectMake(0, -48, 320, self.view.frame.size.height - 48);
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     [previewLayer setFrame:previewFrame];
