@@ -204,6 +204,8 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
 {
     [self.view setBackgroundColor:[UIColor clearColor]];
     session = [[AVCaptureSession alloc]init];
+    if ([session canSetSessionPreset:AVCaptureSessionPresetPhoto])
+        [session setSessionPreset:AVCaptureSessionPresetPhoto];
     backCamera = [self getBackCamera];
     
     NSError* e = nil;
