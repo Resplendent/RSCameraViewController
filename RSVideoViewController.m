@@ -17,6 +17,42 @@
 
 @synthesize delegate = _delegate;
 
+- (UIImage*)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
+{
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    /*Lock the image buffer*/
+    CVPixelBufferLockBaseAddress(imageBuffer,0);
+    /*Get information about the image*/
+    uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    /*We unlock the  image buffer*/
+    CVPixelBufferUnlockBaseAddress(imageBuffer,0);
+    
+    /*Create a CGImageRef from the CVImageBufferRef*/
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    CGContextRef newContext = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+    CGImageRef newImage = CGBitmapContextCreateImage(newContext);
+    
+    /*We release some components*/
+    CGContextRelease(newContext);
+    CGColorSpaceRelease(colorSpace);
+    
+    /*We display the result on the custom layer*/
+    /*self.customLayer.contents = (id) newImage;*/
+    
+    /*We display the result on the image view (We need to change the orientation of the image so that the video is displayed correctly)*/
+    UIImage *image= [UIImage imageWithCGImage:newImage scale:1.0 orientation:UIImageOrientationRight];
+
+    /*We relase the CGImageRef*/
+    CGImageRelease(newImage);
+    return image;
+}
+
+
+
 UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -91,14 +127,26 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
 -(void)captureImage
 {
     [self recycleConnection];
+    
+
+    
     [stillOutput captureStillImageAsynchronouslyFromConnection:videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
         if (error)
             [_delegate cameraCaptureDidFail:self andError:error];
         
         else
         {
+            [[stillOutput availableImageDataCodecTypes]enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                NSLog(@"%@", obj);
+            }];
+            
             NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
-            [_delegate cameraCaptureDidFinish:self andUIImageData:imageData];
+            
+//            UIImage* i = imageFromSampleBuffer(imageDataSampleBuffer);
+            
+            UIImage* i = [UIImage imageWithData:imageData];
+            
+            [_delegate cameraCaptureDidFinish:self withImage:i];
         }
     }];
 }
@@ -172,7 +220,11 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     }
     
     stillOutput = [[AVCaptureStillImageOutput alloc]init];
+
     
+//    NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA], (id)kCVPixelBufferPixelFormatTypeKey, nil];
+    
+//    [stillOutput setOutputSettings:outputSettings];
 
     if ([session canAddOutput:stillOutput])
         [session addOutput:stillOutput];
@@ -180,16 +232,17 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     /*
      Adjust this to change the size of the preview frame
      */
-    CGRect previewFrame = CGRectMake(0, 0, 320, self.view.frame.size.height);// - 95);
-    
+//    CGRect previewFrame = CGRectMake(0, 0, 320, self.view.frame.size.height);// - 95);
+    CGRect previewFrame = CGRectZero;// CGRectMake(44, 92, 320, self.view.frame.size.height - 202);
     /*
      Adjust the position of the preview frame
      */
-    CGRect bounds = CGRectMake(0, -48, 320, self.view.frame.size.height - 48);
+//    CGRect bounds = CGRectMake(0, -48, 320, self.view.frame.size.height - 48);
+    CGRect bounds = CGRectMake(0, 0, 320, self.view.frame.size.height - 96);
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     [previewLayer setFrame:previewFrame];
-    previewLayer.videoGravity = AVLayerVideoGravityResize;
+    previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     previewLayer.bounds = bounds;
     previewLayer.position=CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
     

@@ -11,7 +11,7 @@
 
 @protocol RSVideoViewControllerDelegate <NSObject>
 
--(void)cameraCaptureDidFinish:(RSVideoViewController*)cameraViewController andUIImageData:(NSData*)imageData;
+-(void)cameraCaptureDidFinish:(RSVideoViewController*)cameraViewController withImage:(UIImage*)image;
 -(void)cameraCaptureDidFail:(RSVideoViewController*)cameraViewController andError:(NSError*)error;
 
 @end
