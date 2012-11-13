@@ -136,10 +136,6 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
         
         else
         {
-            [[stillOutput availableImageDataCodecTypes]enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                NSLog(@"%@", obj);
-            }];
-            
             NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
             
 //            UIImage* i = imageFromSampleBuffer(imageDataSampleBuffer);
