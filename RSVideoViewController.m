@@ -191,10 +191,23 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     isFront = !isFront;
 }
 
-//-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-//{
-//    NSLog(@"Camera Bool State Changed To %@ from %@", [change objectForKey:@"new"], [change objectForKey:@"old"]);
-//}
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self)
+    {
+        CGSize _screenSize = [[UIScreen mainScreen]bounds].size;
+        if (_screenSize.height > 480)
+        {
+            _barHeight = 96.0f;
+        }
+        else
+        {
+            _barHeight = 53.0f;
+        }
+    }
+    return self;
+}
 
 - (void)viewDidLoad
 {
@@ -230,13 +243,15 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
     /*
      Adjust this to change the size of the preview frame
      */
-//    CGRect previewFrame = CGRectMake(0, 0, 320, self.view.frame.size.height);// - 95);
-    CGRect previewFrame = CGRectZero;// CGRectMake(44, 92, 320, self.view.frame.size.height - 202);
+
+    CGRect previewFrame = self.view.frame;
     /*
      Adjust the position of the preview frame
      */
-//    CGRect bounds = CGRectMake(0, -48, 320, self.view.frame.size.height - 48);
-    CGRect bounds = CGRectMake(0, 0, 320, self.view.frame.size.height - 96);
+    
+    CGRect bounds = CGRectMake(0, 0, 320, self.view.frame.size.height - _barHeight);
+    
+//    CGRect bounds = self.view.bounds;
     
     AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
     [previewLayer setFrame:previewFrame];

@@ -31,6 +31,8 @@
     AVCaptureConnection *videoConnection;
 
     BOOL isFront;
+    
+    float _barHeight;
 }
 
 -(void)switchCameras;
