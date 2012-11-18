@@ -128,8 +128,6 @@ UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer) {
 {
     [self recycleConnection];
     
-
-    
     [stillOutput captureStillImageAsynchronouslyFromConnection:videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
         if (error)
             [_delegate cameraCaptureDidFail:self andError:error];
