@@ -277,7 +277,7 @@ return newImage;
     
     [self doRecycle];
     
-    isFront = YES;
+    isFront = NO;
     
     [super viewDidLoad];
 }
@@ -286,6 +286,29 @@ return newImage;
 {
     [session startRunning];
     [super viewDidAppear:animated];
+}
+
+-(void)rearCameraFocusAtPoint:(CGPoint)point
+{
+    if ([backCamera isFocusPointOfInterestSupported] && [backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [backCamera isExposurePointOfInterestSupported])// && [backCamera isExposureModeSupported:AVCaptureExposureModeLocked])
+    {
+        NSError* e = nil;
+        if ([backCamera lockForConfiguration:&e])
+        {
+            NSLog(@"Config to point %@", NSStringFromCGPoint(point));
+            [backCamera setFocusPointOfInterest:point];
+            [backCamera setFocusMode:AVCaptureFocusModeAutoFocus];
+            [backCamera setExposurePointOfInterest:point];
+//            [backCamera setExposureMode:AVCaptureExposureModeLocked];
+            
+            if ([backCamera isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
+            {
+                [backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+            }
+            
+            [backCamera unlockForConfiguration];
+        }
+    }
 }
 
 /*-(void)dealloc

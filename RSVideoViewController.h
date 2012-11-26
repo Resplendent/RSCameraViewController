@@ -39,6 +39,8 @@
 
 -(void)captureImage;
 
+-(void)rearCameraFocusAtPoint:(CGPoint)point;
+
 @property(nonatomic, assign)id <RSVideoViewControllerDelegate> delegate;
 
 @end
