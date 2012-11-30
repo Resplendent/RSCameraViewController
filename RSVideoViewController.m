@@ -167,7 +167,15 @@ return newImage;
     NSArray* devices = [AVCaptureDevice devices];
     for (AVCaptureDevice* device in devices) {
         if ([device position] == AVCaptureDevicePositionBack)
+        {
+            if ([device isExposureModeSupported:AVCaptureExposureModeLocked])
+            {
+                [device lockForConfiguration:nil];
+                [device setExposureMode:AVCaptureExposureModeLocked];
+                [device unlockForConfiguration];
+            }
             return device;
+        }
     }
     return nil;
 }
@@ -232,6 +240,10 @@ return newImage;
     backCamera = [self getBackCamera];
     
     NSError* e = nil;
+    [backCamera lockForConfiguration:&e];
+    if (!e)
+        [backCamera setFlashMode:AVCaptureFlashModeAuto];
+    
     
     if (backCamera)
     {
@@ -288,6 +300,25 @@ return newImage;
     [super viewDidAppear:animated];
 }
 
+-(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode
+{
+    if ([backCamera isFlashModeSupported:mode])
+    {
+        NSError* e = nil;
+        [backCamera lockForConfiguration:&e];
+        
+        if (e)
+            return NO;
+        else
+        {
+            [backCamera setFlashMode:mode];
+            return YES;
+        }
+    }
+    else
+        return NO;
+}
+
 -(void)rearCameraFocusAtPoint:(CGPoint)point
 {
     if ([backCamera isFocusPointOfInterestSupported] && [backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [backCamera isExposurePointOfInterestSupported])// && [backCamera isExposureModeSupported:AVCaptureExposureModeLocked])
@@ -295,15 +326,22 @@ return newImage;
         NSError* e = nil;
         if ([backCamera lockForConfiguration:&e])
         {
-            NSLog(@"Config to point %@", NSStringFromCGPoint(point));
+//            NSLog(@"Config to point %@", NSStringFromCGPoint(point));
+//            [backCamera setFocusPointOfInterest:point];
+//            [backCamera setFocusMode:AVCaptureFocusModeAutoFocus];
+            if ([backCamera isExposurePointOfInterestSupported])
+            {
+                NSLog(@"I can set this POI");
+                CGPoint test = CGPointMake(1.01, 1.01);
+                [backCamera setExposurePointOfInterest:test];
+            }
+            
             [backCamera setFocusPointOfInterest:point];
-            [backCamera setFocusMode:AVCaptureFocusModeAutoFocus];
-            [backCamera setExposurePointOfInterest:point];
-//            [backCamera setExposureMode:AVCaptureExposureModeLocked];
+//            [backCamera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
             
             if ([backCamera isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
             {
-                [backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+//                [backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
             }
             
             [backCamera unlockForConfiguration];

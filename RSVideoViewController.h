@@ -41,6 +41,8 @@
 
 -(void)rearCameraFocusAtPoint:(CGPoint)point;
 
+-(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
+
 @property(nonatomic, assign)id <RSVideoViewControllerDelegate> delegate;
 
 @end
