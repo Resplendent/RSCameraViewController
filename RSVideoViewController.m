@@ -101,23 +101,23 @@
 
 -(void)doRecycle
 {
-    videoConnection = nil;
+    _videoConnection = nil;
     for (AVCaptureConnection *connection in stillOutput.connections) {
         for (AVCaptureInputPort *port in [connection inputPorts]) {
             if ([[port mediaType] isEqual:AVMediaTypeVideo] ) {
-                videoConnection = connection;
+                _videoConnection = connection;
                 break;
             }
         }
-        if (videoConnection) { break; }
+        if (_videoConnection) { break; }
     }
 }
 
 -(void)recycleConnection
 {
-    if ([videoConnection respondsToSelector:@selector(isActive)])
+    if ([_videoConnection respondsToSelector:@selector(isActive)])
     {
-        if (![videoConnection isActive])
+        if (![_videoConnection isActive])
         {
             [self doRecycle];
         }
@@ -128,7 +128,7 @@
 {
     [self recycleConnection];
     
-    [stillOutput captureStillImageAsynchronouslyFromConnection:videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
+    [stillOutput captureStillImageAsynchronouslyFromConnection:_videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
         if (error)
             [_delegate cameraCaptureDidFail:self andError:error];
         

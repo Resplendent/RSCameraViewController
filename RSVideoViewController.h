@@ -22,9 +22,6 @@
     AVCaptureStillImageOutput* stillOutput;
     AVCaptureSession* session;
 
-    
-    AVCaptureConnection *videoConnection;
-
     BOOL isFront;
     
     float _barHeight;
@@ -49,5 +46,7 @@
 @property(nonatomic, readonly) AVCaptureDeviceInput* frontCameraInput;
 
 @property(nonatomic, readonly) AVCaptureDeviceInput* backCameraInput;
+
+@property(nonatomic, readonly) AVCaptureConnection* videoConnection;
 
 @end
