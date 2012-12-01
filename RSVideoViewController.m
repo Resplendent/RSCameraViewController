@@ -18,6 +18,13 @@
 
 @synthesize delegate = _delegate;
 
+
+-(CGRect)video_previewLayerFrame
+{
+    return _previewLayer.frame;
+}
+
+
 - (UIImage*)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
     CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -51,29 +58,6 @@
     CGImageRelease(newImage);
     return image;
 }
-
-/*
- - (CGImageRef) imageFromSampleBuffer:(CMSampleBufferRef) sampleBuffer // Create a CGImageRef from sample buffer data
- {
- CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
- CVPixelBufferLockBaseAddress(imageBuffer,0);        // Lock the image buffer
- 
- uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);   // Get information of the image
- size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer);
- size_t width = CVPixelBufferGetWidth(imageBuffer);
- size_t height = CVPixelBufferGetHeight(imageBuffer);
- CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
- 
- CGContextRef newContext = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace, kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
- CGImageRef newImage = CGBitmapContextCreateImage(newContext);
- CGContextRelease(newContext);
- 
- CGColorSpaceRelease(colorSpace);
- CVPixelBufferUnlockBaseAddress(imageBuffer,0);
-
-return newImage;
-}
- */
 
 - (UIImage *) imageFromSampleBuffer:(CMSampleBufferRef) sampleBuffer
 {
@@ -162,7 +146,7 @@ return newImage;
 }
 
 
--(AVCaptureDevice*)getBackCamera
+-(AVCaptureDevice*)get_backCamera
 {
     NSArray* devices = [AVCaptureDevice devices];
     for (AVCaptureDevice* device in devices) {
@@ -180,7 +164,7 @@ return newImage;
     return nil;
 }
 
--(AVCaptureDevice*)getFrontCamera
+-(AVCaptureDevice*)get_frontCamera
 {
     NSArray* devices = [AVCaptureDevice devices];
     for (AVCaptureDevice* device in devices) {
@@ -192,23 +176,23 @@ return newImage;
 
 -(void)switchCameras
 {
-    if (!frontCamera)
+    if (!_frontCamera)
     {
-        frontCamera = [self getFrontCamera];
+        _frontCamera = [self get_frontCamera];
         NSError* e = nil;
-        frontCameraInput = [[AVCaptureDeviceInput alloc] initWithDevice:frontCamera error:&e];
+        _frontCameraInput = [[AVCaptureDeviceInput alloc] initWithDevice:_frontCamera error:&e];
         if (e)
             NSLog(@"Error initalizing the Front Camera Capture Device");
         
     }
-    if ([[session inputs] containsObject:backCameraInput])
-        [session removeInput:backCameraInput];
+    if ([[session inputs] containsObject:_backCameraInput])
+        [session removeInput:_backCameraInput];
     
-    if ([[session inputs] containsObject:frontCameraInput])
-        [session removeInput:frontCameraInput];
+    if ([[session inputs] containsObject:_frontCameraInput])
+        [session removeInput:_frontCameraInput];
     
     
-    isFront ? [session addInput:frontCameraInput]:[session addInput:backCameraInput];
+    isFront ? [session addInput:_frontCameraInput]:[session addInput:_backCameraInput];
     
     isFront = !isFront;
 }
@@ -237,22 +221,22 @@ return newImage;
     session = [[AVCaptureSession alloc]init];
     if ([session canSetSessionPreset:AVCaptureSessionPresetPhoto])
         [session setSessionPreset:AVCaptureSessionPresetPhoto];
-    backCamera = [self getBackCamera];
+    _backCamera = [self get_backCamera];
     
     NSError* e = nil;
-    [backCamera lockForConfiguration:&e];
+    [_backCamera lockForConfiguration:&e];
     if (!e)
-        [backCamera setFlashMode:AVCaptureFlashModeAuto];
+        [_backCamera setFlashMode:AVCaptureFlashModeAuto];
     
     
-    if (backCamera)
+    if (_backCamera)
     {
-        backCameraInput = [[AVCaptureDeviceInput alloc]initWithDevice:backCamera error:&e];
+        _backCameraInput = [[AVCaptureDeviceInput alloc]initWithDevice:_backCamera error:&e];
         if (e)
-            NSLog(@"Error setting BackCameraInput %@", e.localizedDescription);
-        if ([session canAddInput:backCameraInput])
+            NSLog(@"Error setting _backCameraInput %@", e.localizedDescription);
+        if ([session canAddInput:_backCameraInput])
         {
-            [session addInput:backCameraInput];
+            [session addInput:_backCameraInput];
         }
     }
     
@@ -279,13 +263,13 @@ return newImage;
     
 //    CGRect bounds = self.view.bounds;
     
-    AVCaptureVideoPreviewLayer* previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
-    [previewLayer setFrame:previewFrame];
-    previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    previewLayer.bounds = bounds;
-    previewLayer.position=CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
+    _previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:session];
+    [_previewLayer setFrame:previewFrame];
+    _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    _previewLayer.bounds = bounds;
+    _previewLayer.position=CGPointMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds));
     
-    [self.view.layer addSublayer:previewLayer];
+    [self.view.layer addSublayer:_previewLayer];
     
     [self doRecycle];
     
@@ -302,16 +286,16 @@ return newImage;
 
 -(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode
 {
-    if ([backCamera isFlashModeSupported:mode])
+    if ([_backCamera isFlashModeSupported:mode])
     {
         NSError* e = nil;
-        [backCamera lockForConfiguration:&e];
+        [_backCamera lockForConfiguration:&e];
         
         if (e)
             return NO;
         else
         {
-            [backCamera setFlashMode:mode];
+            [_backCamera setFlashMode:mode];
             return YES;
         }
     }
@@ -321,49 +305,37 @@ return newImage;
 
 -(void)rearCameraFocusAtPoint:(CGPoint)point
 {
-    if ([backCamera isFocusPointOfInterestSupported] && [backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [backCamera isExposurePointOfInterestSupported])// && [backCamera isExposureModeSupported:AVCaptureExposureModeLocked])
+    if ([_backCamera isFocusPointOfInterestSupported] && [_backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [_backCamera isExposurePointOfInterestSupported])// && [_backCamera isExposureModeSupported:AVCaptureExposureModeLocked])
     {
         NSError* e = nil;
-        if ([backCamera lockForConfiguration:&e])
+        if ([_backCamera lockForConfiguration:&e])
         {
-//            NSLog(@"Config to point %@", NSStringFromCGPoint(point));
-//            [backCamera setFocusPointOfInterest:point];
-//            [backCamera setFocusMode:AVCaptureFocusModeAutoFocus];
-            if ([backCamera isExposurePointOfInterestSupported])
+            if (e)
+            {NSLog(@"ERROR %@", e);return;}
+            
+            if ([_backCamera isExposurePointOfInterestSupported])
             {
-                NSLog(@"I can set this POI");
-                CGPoint test = CGPointMake(1.01, 1.01);
-                [backCamera setExposurePointOfInterest:test];
+                NSLog(@"Setting Exposure POI: %@", NSStringFromCGPoint(point));
+                [_backCamera setExposureMode:AVCaptureExposureModeLocked];
+                [_backCamera setExposurePointOfInterest:point];
+            }
+            if ([_backCamera isFocusPointOfInterestSupported])
+            {
+                NSLog(@"Setting Focus POI: %@", NSStringFromCGPoint(point));
+                [_backCamera setFocusPointOfInterest:point];
+                [_backCamera setFocusMode:AVCaptureFocusModeLocked];
             }
             
-            [backCamera setFocusPointOfInterest:point];
-//            [backCamera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
-            
-            if ([backCamera isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
+            if ([_backCamera isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
             {
-//                [backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+//                NSLog(@"Setting white balance mode to AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance");
+                [_backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
             }
             
-            [backCamera unlockForConfiguration];
+            [_backCamera unlockForConfiguration];
         }
     }
 }
-
-/*-(void)dealloc
-{
-    [stillOutput removeObserver:self forKeyPath:@"capturingStillImage"];
-}
-
--(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self)
-    {
-        [stillOutput addObserver:self forKeyPath:@"capturingStillImage" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:nil];
-    }
-    return self;
-}
- */
 
 - (void)viewDidUnload
 {

@@ -19,14 +19,9 @@
 
 @interface RSVideoViewController : UIViewController
 {
-    AVCaptureDevice* backCamera;
     AVCaptureStillImageOutput* stillOutput;
     AVCaptureSession* session;
-    
-    AVCaptureDevice* frontCamera;
-    
-    AVCaptureDeviceInput* frontCameraInput;
-    AVCaptureDeviceInput* backCameraInput;
+
     
     AVCaptureConnection *videoConnection;
 
@@ -44,5 +39,15 @@
 -(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
 
 @property(nonatomic, assign)id <RSVideoViewControllerDelegate> delegate;
+
+@property(readonly) AVCaptureVideoPreviewLayer* previewLayer;
+
+@property(nonatomic, readonly) AVCaptureDevice* backCamera;
+
+@property(nonatomic, readonly) AVCaptureDevice* frontCamera;
+
+@property(nonatomic, readonly) AVCaptureDeviceInput* frontCameraInput;
+
+@property(nonatomic, readonly) AVCaptureDeviceInput* backCameraInput;
 
 @end
