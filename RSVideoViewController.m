@@ -280,7 +280,7 @@
 
 -(void)viewDidAppear:(BOOL)animated
 {
-    [session startRunning];
+    [self setEnableCameraCapture:YES];
     [super viewDidAppear:animated];
 }
 
@@ -339,13 +339,34 @@
 
 - (void)viewDidUnload
 {
-    [session stopRunning];
+    [self setEnableCameraCapture:NO];
     [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+#pragma mark - Setter/Getter methods
+-(BOOL)enableCameraCapture
+{
+    return session.isRunning;
+}
+
+-(void)setEnableCameraCapture:(BOOL)enableCameraCapture
+{
+    if (self.enableCameraCapture == enableCameraCapture)
+        return;
+
+    if (enableCameraCapture)
+    {
+        [session startRunning];
+    }
+    else
+    {
+        [session stopRunning];
+    }
 }
 
 @end
