@@ -325,7 +325,7 @@
 //                [_backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
             }
             
-//            [_backCamera unlockForConfiguration];
+            [_backCamera unlockForConfiguration];
         }
     }
 }
