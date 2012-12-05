@@ -126,7 +126,7 @@
 
 -(void)captureImage
 {
-    [self recycleConnection];
+//    [self recycleConnection];
     
     [stillOutput captureStillImageAsynchronouslyFromConnection:_videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
         if (error)
@@ -134,11 +134,11 @@
         
         else
         {
-//            NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+            NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
             
-            UIImage* i = [self imageFromSampleBuffer:imageDataSampleBuffer];
+//            UIImage* i = [self imageFromSampleBuffer:imageDataSampleBuffer];
             
-//            UIImage* i = [UIImage imageWithData:imageData];
+            UIImage* i = [UIImage imageWithData:imageData];
             
             [_delegate cameraCaptureDidFinish:self withImage:i];
         }
@@ -154,9 +154,13 @@
         {
             if ([device isExposureModeSupported:AVCaptureExposureModeLocked])
             {
-                [device lockForConfiguration:nil];
-                [device setExposureMode:AVCaptureExposureModeLocked];
-                [device unlockForConfiguration];
+                NSError* e = nil;
+                if ([device lockForConfiguration:&e])
+                {
+                    NSLog(@"Logging exposure");
+                    device.exposureMode = AVCaptureExposureModeLocked;
+                    [device unlockForConfiguration];
+                }
             }
             return device;
         }
@@ -218,41 +222,30 @@
 - (void)viewDidLoad
 {
     [self.view setBackgroundColor:[UIColor clearColor]];
-    session = [[AVCaptureSession alloc]init];
+    session = [AVCaptureSession new];
     if ([session canSetSessionPreset:AVCaptureSessionPresetPhoto])
         [session setSessionPreset:AVCaptureSessionPresetPhoto];
     _backCamera = [self get_backCamera];
-    
-    NSError* e = nil;
-    [_backCamera lockForConfiguration:&e];
-    if (!e)
-        [_backCamera setFlashMode:AVCaptureFlashModeAuto];
-    
-    
+    NSError* e;
     if (_backCamera)
     {
-        _backCameraInput = [[AVCaptureDeviceInput alloc]initWithDevice:_backCamera error:&e];
-        if (e)
-            NSLog(@"Error setting _backCameraInput %@", e.localizedDescription);
+        _backCameraInput = [AVCaptureDeviceInput deviceInputWithDevice:_backCamera error:&e];
+        if (e) @throw e;
         if ([session canAddInput:_backCameraInput])
-        {
             [session addInput:_backCameraInput];
-        }
     }
     
-    stillOutput = [[AVCaptureStillImageOutput alloc]init];
-
+    stillOutput = [AVCaptureStillImageOutput new];
     
-    NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA], (id)kCVPixelBufferPixelFormatTypeKey, nil];
+//    NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA], (id)kCVPixelBufferPixelFormatTypeKey, nil];
     
-    [stillOutput setOutputSettings:outputSettings];
-
+    NSDictionary* newOutput = @{[NSNumber numberWithUnsignedInt:kCVPixelFormatType_32BGRA] : (id)kCVPixelBufferPixelFormatTypeKey, AVVideoCodecJPEG : AVVideoCodecKey};
+    
+    [stillOutput setOutputSettings:newOutput];
+    
     if ([session canAddOutput:stillOutput])
         [session addOutput:stillOutput];
     
-    /*
-     Adjust this to change the size of the preview frame
-     */
 
     CGRect previewFrame = self.view.frame;
     /*
@@ -280,7 +273,7 @@
 
 -(void)viewDidAppear:(BOOL)animated
 {
-    [session startRunning];
+    [self setEnableCameraCapture:YES];
     [super viewDidAppear:animated];
 }
 
@@ -315,37 +308,58 @@
             
             if ([_backCamera isExposurePointOfInterestSupported])
             {
-                NSLog(@"Setting Exposure POI: %@", NSStringFromCGPoint(point));
-                [_backCamera setExposureMode:AVCaptureExposureModeLocked];
+//                NSLog(@"Setting Exposure POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
+//                [_backCamera setExposureMode:AVCaptureExposureModeLocked];
                 [_backCamera setExposurePointOfInterest:point];
             }
             if ([_backCamera isFocusPointOfInterestSupported])
             {
-                NSLog(@"Setting Focus POI: %@", NSStringFromCGPoint(point));
+//                NSLog(@"Setting Focus POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
                 [_backCamera setFocusPointOfInterest:point];
-                [_backCamera setFocusMode:AVCaptureFocusModeLocked];
+//                [_backCamera setFocusMode:AVCaptureFocusModeLocked];
             }
             
             if ([_backCamera isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
             {
 //                NSLog(@"Setting white balance mode to AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance");
-                [_backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+//                [_backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
             }
             
-            [_backCamera unlockForConfiguration];
+//            [_backCamera unlockForConfiguration];
         }
     }
 }
 
 - (void)viewDidUnload
 {
-    [session stopRunning];
+    [self setEnableCameraCapture:NO];
     [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+#pragma mark - Setter/Getter methods
+-(BOOL)enableCameraCapture
+{
+    return session.isRunning;
+}
+
+-(void)setEnableCameraCapture:(BOOL)enableCameraCapture
+{
+    if (self.enableCameraCapture == enableCameraCapture)
+        return;
+
+    if (enableCameraCapture)
+    {
+        [session startRunning];
+    }
+    else
+    {
+        [session stopRunning];
+    }
 }
 
 @end

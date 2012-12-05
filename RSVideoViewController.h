@@ -35,6 +35,8 @@
 
 -(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
 
+@property (nonatomic, assign) BOOL enableCameraCapture;
+
 @property(nonatomic, assign)id <RSVideoViewControllerDelegate> delegate;
 
 @property(readonly) AVCaptureVideoPreviewLayer* previewLayer;
