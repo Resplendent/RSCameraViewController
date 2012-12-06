@@ -226,6 +226,17 @@
     if ([session canSetSessionPreset:AVCaptureSessionPresetPhoto])
         [session setSessionPreset:AVCaptureSessionPresetPhoto];
     _backCamera = [self get_backCamera];
+    if ([_backCamera respondsToSelector:@selector(isLowLightBoostSupported)])
+    {
+        if ([_backCamera isLowLightBoostSupported])
+        {
+            NSError* e = nil;
+            [_backCamera lockForConfiguration:&e];
+            if (e) @throw e;
+            [_backCamera setAutomaticallyEnablesLowLightBoostWhenAvailable:YES];
+            [_backCamera unlockForConfiguration];
+        }
+    }
     NSError* e;
     if (_backCamera)
     {
@@ -308,13 +319,13 @@
             
             if ([_backCamera isExposurePointOfInterestSupported])
             {
-//                NSLog(@"Setting Exposure POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
-//                [_backCamera setExposureMode:AVCaptureExposureModeLocked];
+                NSLog(@"Setting Exposure POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
                 [_backCamera setExposurePointOfInterest:point];
+//              [_backCamera setExposureMode:AVCaptureExposureModeLocked];
             }
             if ([_backCamera isFocusPointOfInterestSupported])
             {
-//                NSLog(@"Setting Focus POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
+                NSLog(@"Setting Focus POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
                 [_backCamera setFocusPointOfInterest:point];
 //                [_backCamera setFocusMode:AVCaptureFocusModeLocked];
             }
