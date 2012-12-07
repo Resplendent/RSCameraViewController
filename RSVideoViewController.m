@@ -355,7 +355,7 @@
             if (e)
             {NSLog(@"ERROR %@", e);return;}
             
-            if ([_backCamera isExposurePointOfInterestSupported])
+            if ([_backCamera isExposurePointOfInterestSupported] && [_backCamera isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
             {
                 [_backCamera setExposurePointOfInterest:point];
                 [_backCamera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
