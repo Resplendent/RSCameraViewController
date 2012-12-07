@@ -155,7 +155,7 @@
         }
         else
         {
-//            NSLog(@"Ended Exposure");
+//            NSLog(@"Ending Exposure");
         }
     }
     else if ([keyPath isEqualToString:@"adjustingFocus"])
@@ -319,6 +319,13 @@
                 [device unlockForConfiguration];
             }
             
+//            if ([device isExposureModeSupported:AVCaptureExposureModeLocked])
+//                NSLog(@"AVCaptureExposureModeLocked");
+//            if ([device isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
+//                NSLog(@"AVCaptureExposureModeContinuousAutoExposure");
+//            if ([device isExposureModeSupported:AVCaptureExposureModeAutoExpose])
+//                NSLog(@"AVCaptureExposureModeAutoExpose");
+            
             [device addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:nil];
             [device addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:nil];
             return device;
@@ -351,6 +358,7 @@
             if ([_backCamera isExposurePointOfInterestSupported])
             {
                 [_backCamera setExposurePointOfInterest:point];
+                [_backCamera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
             }
             if ([_backCamera isFocusPointOfInterestSupported])
             {
