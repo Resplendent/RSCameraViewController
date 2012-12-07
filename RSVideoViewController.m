@@ -126,7 +126,7 @@
 
 -(void)captureImage
 {
-//    [self recycleConnection];
+    [self recycleConnection];
     
     [stillOutput captureStillImageAsynchronouslyFromConnection:_videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
         if (error)
@@ -145,38 +145,37 @@
     }];
 }
 
-
--(AVCaptureDevice*)get_backCamera
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    NSArray* devices = [AVCaptureDevice devices];
-    for (AVCaptureDevice* device in devices) {
-        if ([device position] == AVCaptureDevicePositionBack)
+    if ([keyPath isEqualToString:@"adjustingExposure"])
+    {
+        if ([[change objectForKey:@"new"] intValue])
         {
-            if ([device isExposureModeSupported:AVCaptureExposureModeLocked])
-            {
-                NSError* e = nil;
-                if ([device lockForConfiguration:&e])
-                {
-                    NSLog(@"Logging exposure");
-                    device.exposureMode = AVCaptureExposureModeLocked;
-                    [device unlockForConfiguration];
-                }
-            }
-            return device;
+//            NSLog(@"Started Exposure");
+        }
+        else
+        {
+//            NSLog(@"Ended Exposure");
         }
     }
-    return nil;
+    else if ([keyPath isEqualToString:@"adjustingFocus"])
+    {
+        if ([[change objectForKey:@"new"] intValue])
+        {
+//            NSLog(@"Started Focus");
+        }
+        else
+        {
+            [_backCamera lockForConfiguration:nil];
+            [_backCamera setFocusMode:AVCaptureFocusModeLocked];
+            [_backCamera unlockForConfiguration];
+//            NSLog(@"End Focus, Locked.");
+        }
+    }
+    else
+        NSLog(@"Odd Keypath %@", keyPath);
 }
 
--(AVCaptureDevice*)get_frontCamera
-{
-    NSArray* devices = [AVCaptureDevice devices];
-    for (AVCaptureDevice* device in devices) {
-        if ([device position] == AVCaptureDevicePositionFront)
-            return device;
-    }
-    return nil;
-}
 
 -(void)switchCameras
 {
@@ -307,9 +306,41 @@
         return NO;
 }
 
+-(AVCaptureDevice*)get_backCamera
+{
+    NSArray* devices = [AVCaptureDevice devices];
+    for (AVCaptureDevice* device in devices) {
+        if ([device position] == AVCaptureDevicePositionBack)
+        {
+            if ([device isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
+            {
+                [device lockForConfiguration:nil];
+                [device setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+                [device unlockForConfiguration];
+            }
+            
+            [device addObserver:self forKeyPath:@"adjustingExposure" options:NSKeyValueObservingOptionNew context:nil];
+            [device addObserver:self forKeyPath:@"adjustingFocus" options:NSKeyValueObservingOptionNew context:nil];
+            return device;
+        }
+    }
+    return nil;
+}
+
+-(AVCaptureDevice*)get_frontCamera
+{
+    NSArray* devices = [AVCaptureDevice devices];
+    for (AVCaptureDevice* device in devices) {
+        if ([device position] == AVCaptureDevicePositionFront)
+            return device;
+    }
+    return nil;
+}
+
+
 -(void)rearCameraFocusAtPoint:(CGPoint)point
 {
-    if ([_backCamera isFocusPointOfInterestSupported] && [_backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [_backCamera isExposurePointOfInterestSupported])// && [_backCamera isExposureModeSupported:AVCaptureExposureModeLocked])
+    if ([_backCamera isFocusPointOfInterestSupported] && [_backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [_backCamera isExposurePointOfInterestSupported])
     {
         NSError* e = nil;
         if ([_backCamera lockForConfiguration:&e])
@@ -319,23 +350,13 @@
             
             if ([_backCamera isExposurePointOfInterestSupported])
             {
-                NSLog(@"Setting Exposure POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
                 [_backCamera setExposurePointOfInterest:point];
-//              [_backCamera setExposureMode:AVCaptureExposureModeLocked];
             }
             if ([_backCamera isFocusPointOfInterestSupported])
             {
-                NSLog(@"Setting Focus POI: %@ %@", NSStringFromCGPoint(point), _backCamera);
                 [_backCamera setFocusPointOfInterest:point];
-//                [_backCamera setFocusMode:AVCaptureFocusModeLocked];
+                [_backCamera setFocusMode:AVCaptureFocusModeAutoFocus];
             }
-            
-            if ([_backCamera isWhiteBalanceModeSupported:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance])
-            {
-//                NSLog(@"Setting white balance mode to AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance");
-//                [_backCamera setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
-            }
-            
             [_backCamera unlockForConfiguration];
         }
     }
@@ -371,6 +392,12 @@
     {
         [session stopRunning];
     }
+}
+
+-(void)dealloc
+{
+    [_backCamera removeObserver:self forKeyPath:@"adjustingExposure"];
+    [_backCamera removeObserver:self forKeyPath:@"adjustingFocus"];
 }
 
 @end
