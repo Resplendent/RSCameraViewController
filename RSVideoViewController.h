@@ -21,8 +21,6 @@
 {
     AVCaptureStillImageOutput* stillOutput;
     AVCaptureSession* session;
-
-    BOOL isFront;
     
     float _barHeight;
 }
@@ -34,6 +32,8 @@
 -(void)cameraFocusAtPoint:(CGPoint)point;
 
 -(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
+
+@property(nonatomic) BOOL isFront;
 
 @property (nonatomic, assign) BOOL enableCameraCapture;
 

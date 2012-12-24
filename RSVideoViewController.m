@@ -18,6 +18,7 @@
 
 @synthesize delegate = _delegate;
 
+@synthesize isFront;
 
 -(CGRect)video_previewLayerFrame
 {
@@ -126,7 +127,7 @@
 
 -(void)captureImage
 {
-    [self recycleConnection];
+    [self doRecycle];
     
     [stillOutput captureStillImageAsynchronouslyFromConnection:_videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
         if (error)
@@ -196,7 +197,6 @@
     
     
     isFront ? [session addInput:_backCameraInput]:[session addInput:_frontCameraInput];
-    
     isFront = !isFront;
 }
 
