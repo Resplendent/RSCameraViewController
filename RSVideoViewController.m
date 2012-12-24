@@ -195,7 +195,7 @@
         [session removeInput:_frontCameraInput];
     
     
-    isFront ? [session addInput:_frontCameraInput]:[session addInput:_backCameraInput];
+    isFront ? [session addInput:_backCameraInput]:[session addInput:_frontCameraInput];
     
     isFront = !isFront;
 }
@@ -345,27 +345,34 @@
 }
 
 
--(void)rearCameraFocusAtPoint:(CGPoint)point
+-(void)cameraFocusAtPoint:(CGPoint)point
 {
-    if ([_backCamera isFocusPointOfInterestSupported] && [_backCamera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [_backCamera isExposurePointOfInterestSupported])
+    AVCaptureDevice* captureDevice;
+    if ([[session inputs] containsObject:_frontCameraInput])
+        captureDevice = _frontCamera;
+    else
+        captureDevice = _backCamera;
+    if ([captureDevice isFocusPointOfInterestSupported] && [captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [captureDevice isExposurePointOfInterestSupported])
     {
         NSError* e = nil;
-        if ([_backCamera lockForConfiguration:&e])
+        if ([captureDevice lockForConfiguration:&e])
         {
             if (e)
             {NSLog(@"ERROR %@", e);return;}
             
-            if ([_backCamera isExposurePointOfInterestSupported] && [_backCamera isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
+            if ([captureDevice isExposurePointOfInterestSupported] && [captureDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
             {
-                [_backCamera setExposurePointOfInterest:point];
-                [_backCamera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+                NSLog(@"Capture Point of Interest Hit");
+                [captureDevice setExposurePointOfInterest:point];
+                [captureDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
             }
-            if ([_backCamera isFocusPointOfInterestSupported])
+            if ([captureDevice isFocusPointOfInterestSupported])
             {
-                [_backCamera setFocusPointOfInterest:point];
-                [_backCamera setFocusMode:AVCaptureFocusModeAutoFocus];
+                NSLog(@"Capture Point of Interest ");
+                [captureDevice setFocusPointOfInterest:point];
+                [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
             }
-            [_backCamera unlockForConfiguration];
+            [captureDevice unlockForConfiguration];
         }
     }
 }

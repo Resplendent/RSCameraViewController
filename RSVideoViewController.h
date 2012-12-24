@@ -31,7 +31,7 @@
 
 -(void)captureImage;
 
--(void)rearCameraFocusAtPoint:(CGPoint)point;
+-(void)cameraFocusAtPoint:(CGPoint)point;
 
 -(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
 
