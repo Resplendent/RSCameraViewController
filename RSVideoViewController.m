@@ -362,13 +362,11 @@
             
             if ([captureDevice isExposurePointOfInterestSupported] && [captureDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
             {
-                NSLog(@"Capture Point of Interest Hit");
                 [captureDevice setExposurePointOfInterest:point];
                 [captureDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
             }
             if ([captureDevice isFocusPointOfInterestSupported])
             {
-                NSLog(@"Capture Point of Interest ");
                 [captureDevice setFocusPointOfInterest:point];
                 [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
             }
