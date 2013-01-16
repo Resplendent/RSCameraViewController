@@ -125,7 +125,7 @@
     }
 }
 
--(void)captureImage
+-(void)captureImageWithCompletionBlock:(void(^)())completion
 {
     [self doRecycle];
     
@@ -143,6 +143,9 @@
             
             [_delegate cameraCaptureDidFinish:self withImage:i];
         }
+
+        if (completion)
+            completion();
     }];
 }
 
