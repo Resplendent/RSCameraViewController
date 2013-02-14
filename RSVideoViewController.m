@@ -125,28 +125,38 @@
     }
 }
 
--(void)captureImageWithCompletionBlock:(void(^)())completion
+-(void)captureImageWithCompletionBlock:(void(^)(BOOL completed))completion
 {
     [self doRecycle];
-    
-    [stillOutput captureStillImageAsynchronouslyFromConnection:_videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
-        if (error)
-            [_delegate cameraCaptureDidFail:self andError:error];
-        
-        else
-        {
-            NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+
+    if (_videoConnection)
+    {
+        [stillOutput captureStillImageAsynchronouslyFromConnection:_videoConnection completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error){
+            if (error)
+                [_delegate cameraCaptureDidFail:self andError:error];
             
-//            UIImage* i = [self imageFromSampleBuffer:imageDataSampleBuffer];
+            else
+            {
+                NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+                
+                //            UIImage* i = [self imageFromSampleBuffer:imageDataSampleBuffer];
+                
+                UIImage* i = [UIImage imageWithData:imageData];
+                
+                [_delegate cameraCaptureDidFinish:self withImage:i];
+            }
             
-            UIImage* i = [UIImage imageWithData:imageData];
-            
-            [_delegate cameraCaptureDidFinish:self withImage:i];
-        }
+            if (completion)
+                completion(YES);
+        }];
+    }
+    else
+    {
+        [_delegate cameraCaptureDidFail:self andError:[NSError errorWithDomain:NSInternalInconsistencyException code:200 userInfo:@{@"reason": @"encountered a nil video connection"}]];
 
         if (completion)
-            completion();
-    }];
+            completion(NO);
+    }
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context

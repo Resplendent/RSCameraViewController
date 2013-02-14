@@ -27,7 +27,7 @@
 
 -(void)switchCameras;
 
--(void)captureImageWithCompletionBlock:(void(^)())completion;
+-(void)captureImageWithCompletionBlock:(void(^)(BOOL completed))completion;
 
 -(void)cameraFocusAtPoint:(CGPoint)point;
 
