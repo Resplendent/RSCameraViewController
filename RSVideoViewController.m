@@ -329,6 +329,8 @@
             {
                 [device lockForConfiguration:nil];
                 [device setWhiteBalanceMode:AVCaptureWhiteBalanceModeContinuousAutoWhiteBalance];
+                if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus])
+                    [device setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
                 [device unlockForConfiguration];
             }
             
