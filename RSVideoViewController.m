@@ -201,9 +201,12 @@
             NSError* e = nil;
             _backCameraInput = [AVCaptureDeviceInput deviceInputWithDevice:_backCamera error:&e];
         }
-        if ([[session inputs] containsObject:_frontCameraInput])
-            [session removeInput:_frontCameraInput];
-        [session addInput:_backCameraInput];
+        if (_backCameraInput)
+        {
+            if ([[session inputs] containsObject:_frontCameraInput])
+                [session removeInput:_frontCameraInput];
+            [session addInput:_backCameraInput];
+        }
     }
     else
     { // go to the front facing camera
@@ -215,11 +218,13 @@
             if (e)
                 NSLog(@"Error initalizing the Front Camera Capture Device");
         }
-        if ([[session inputs] containsObject:_backCameraInput])
-            [session removeInput:_backCameraInput];
-        [session addInput:_frontCameraInput];
+        if (_frontCameraInput)
+        {
+            if ([[session inputs] containsObject:_backCameraInput])
+                [session removeInput:_backCameraInput];
+            [session addInput:_frontCameraInput];
+        }
     }
-
     isFront = !isFront;
 }
 
