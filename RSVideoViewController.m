@@ -183,7 +183,7 @@
             [_backCamera lockForConfiguration:nil];
             [_backCamera setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
             [_backCamera unlockForConfiguration];
-            NSLog(@"End Focus, Locked.");
+//            NSLog(@"End Focus, Locked.");
         }
     }
     else
