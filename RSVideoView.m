@@ -370,7 +370,6 @@ static NSArray* avCaptureSessionPresetsToTry;
         }
         else
         {
-            RUDLog(@"avCaptureSessionPresetsToTry: %@",avCaptureSessionPresetsToTry);
             __block NSString* sessionPresetToUse = nil;
             [avCaptureSessionPresetsToTry enumerateObjectsUsingBlock:^(NSString* sessionPresetToTry, NSUInteger idx, BOOL *stop) {
                 if ([self.session canSetSessionPreset:sessionPresetToTry] && [newCurrentCaptureDeviceInput.device supportsAVCaptureSessionPreset:sessionPresetToTry])
@@ -386,7 +385,6 @@ static NSArray* avCaptureSessionPresetsToTry;
 
             if (sessionPresetToUse)
             {
-                RUDLog(@"will use sessionPresetToUse: %@",sessionPresetToUse);
                 [self.session setSessionPreset:AVCaptureSessionPresetPhoto];
                 [self.session addInput:newCurrentCaptureDeviceInput];
             }
@@ -430,15 +428,16 @@ static NSArray* avCaptureSessionPresetsToTry;
 #pragma mark - Camera Focus
 -(void)focusCameraAtPoint:(CGPoint)point
 {
-    AVCaptureDevice* captureDevice = [self captureDeviceForCameraState:self.cameraState];
-    if (captureDevice)
+//    AVCaptureDevice* captureDevice = [self captureDeviceForCameraState:self.cameraState];
+    AVCaptureDeviceInput* captureDeviceInput = [self captureDeviceInputForCameraState:self.cameraState];
+    if (captureDeviceInput)
     {
-        if ([self.session.inputs containsObject:captureDevice])
+        if ([self.session.inputs containsObject:captureDeviceInput])
         {
-            if ([captureDevice isFocusPointOfInterestSupported] && [captureDevice isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [captureDevice isExposurePointOfInterestSupported])
+            if ([captureDeviceInput.device isFocusPointOfInterestSupported] && [captureDeviceInput.device isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [captureDeviceInput.device isExposurePointOfInterestSupported])
             {
                 NSError* error = nil;
-                [captureDevice lockForConfiguration:&error];
+                [captureDeviceInput.device lockForConfiguration:&error];
 
                 if (error)
                 {
@@ -446,23 +445,23 @@ static NSArray* avCaptureSessionPresetsToTry;
                 }
                 else
                 {
-                    if ([captureDevice isExposurePointOfInterestSupported] && [captureDevice isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
+                    if ([captureDeviceInput.device isExposurePointOfInterestSupported] && [captureDeviceInput.device isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure])
                     {
-                        [captureDevice setExposurePointOfInterest:point];
-                        [captureDevice setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+                        [captureDeviceInput.device setExposurePointOfInterest:point];
+                        [captureDeviceInput.device setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
                     }
-                    if ([captureDevice isFocusPointOfInterestSupported])
+                    if ([captureDeviceInput.device isFocusPointOfInterestSupported])
                     {
-                        [captureDevice setFocusPointOfInterest:point];
-                        [captureDevice setFocusMode:AVCaptureFocusModeAutoFocus];
+                        [captureDeviceInput.device setFocusPointOfInterest:point];
+                        [captureDeviceInput.device setFocusMode:AVCaptureFocusModeAutoFocus];
                     }
-                    [captureDevice unlockForConfiguration];
+                    [captureDeviceInput.device unlockForConfiguration];
                 }
             }
         }
         else
         {
-            RUDLog(@"current capture device %@ during state %i is not contained in session's %@ inputs %@",captureDevice,self.cameraState,self.session,self.session.inputs);
+            RUDLog(@"current capture device input %@ has capture device %@ during state %i is not contained in session's %@ inputs %@",captureDeviceInput,captureDeviceInput.device,self.cameraState,self.session,self.session.inputs);
         }
     }
 }
