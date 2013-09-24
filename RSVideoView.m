@@ -36,7 +36,7 @@
     {
         // Initialization code
         _previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
-        [_previewLayer setBackgroundColor:[UIColor redColor].CGColor];
+//        [_previewLayer setBackgroundColor:[UIColor redColor].CGColor];
 //        [_previewLayer setFrame:previewFrame];
         _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
 //        _previewLayer.bounds = bounds;
@@ -78,9 +78,17 @@
         }
         else
         {
-            [self.backCamera lockForConfiguration:nil];
-            [self.backCamera setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-            [self.backCamera unlockForConfiguration];
+            NSError* lockError = nil;
+            [self.backCamera lockForConfiguration:&lockError];
+            if (lockError)
+            {
+                RUDLog(@"lockError: %@",lockError);
+            }
+            else
+            {
+                [self.backCamera setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+                [self.backCamera unlockForConfiguration];
+            }
             //            NSLog(@"End Focus, Locked.");
         }
     }
