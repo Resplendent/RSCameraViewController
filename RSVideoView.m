@@ -22,6 +22,7 @@
 
 -(AVCaptureDeviceInput*)captureDeviceInputForCameraState:(RSVideoViewCameraState)cameraState;
 -(AVCaptureDevice*)captureDeviceForCameraState:(RSVideoViewCameraState)cameraState;
+
 -(void)setCameraStateToBack;
 -(void)setCameraStateToFront;
 
@@ -35,6 +36,7 @@
     {
         // Initialization code
         _previewLayer = [AVCaptureVideoPreviewLayer layerWithSession:self.session];
+        [_previewLayer setBackgroundColor:[UIColor redColor].CGColor];
 //        [_previewLayer setFrame:previewFrame];
         _previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
 //        _previewLayer.bounds = bounds;
@@ -51,16 +53,9 @@
 {
     [super layoutSubviews];
     [_previewLayer setFrame:self.previewLayerFrame];
+//    [_previewLayer setBounds:self.bounds];
+//    [_previewLayer setPosition:(CGPoint){CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds)}];
 }
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
@@ -229,8 +224,8 @@
 -(void)recycleVideoConnection
 {
     _videoConnection = nil;
-    [self.stillOutput.connections enumerateObjectsUsingBlock:^(AVCaptureConnection *connection, NSUInteger idx, BOOL *stillOutputConnectionsStop) {
-        [[connection inputPorts] enumerateObjectsUsingBlock:^(AVCaptureInputPort *port, NSUInteger idx, BOOL *portStop) {
+    [self.stillOutput.connections enumerateObjectsUsingBlock:^(AVCaptureConnection *connection, NSUInteger connectionIndex, BOOL *stillOutputConnectionsStop) {
+        [[connection inputPorts] enumerateObjectsUsingBlock:^(AVCaptureInputPort *port, NSUInteger portIndex, BOOL *portStop) {
             if ([[port mediaType] isEqual:AVMediaTypeVideo] )
             {
                 _videoConnection = connection;
@@ -245,6 +240,7 @@
 {
     [self setImageTakingDelegate:nil];
     [self setBackCamera:nil];
+    [self setEnableCameraCapture:NO];
 }
 
 #pragma mark - Capture Current Image
@@ -274,11 +270,15 @@
     else
     {
         [self.imageTakingDelegate videoViewFailedImageCaptureDueToNoVideoConnection:self];
-//        [_delegate cameraCaptureDidFail:self andError:[NSError errorWithDomain:NSInternalInconsistencyException code:200 userInfo:@{@"reason": @"encountered a nil video connection"}]];
     }
 }
 
 #pragma mark - Capure Device Getter
+-(AVCaptureDevice *)captureDeviceForCurrentCameraState
+{
+    return [self captureDeviceForCameraState:self.cameraState];
+}
+
 -(AVCaptureDevice*)captureDeviceForCameraState:(RSVideoViewCameraState)cameraState
 {
     switch (cameraState)
@@ -293,6 +293,11 @@
 }
 
 #pragma mark - Capure Device Input Getter
+-(AVCaptureDeviceInput *)captureDeviceInputForCurrentCameraState
+{
+    return [self captureDeviceInputForCameraState:self.cameraState];
+}
+
 -(AVCaptureDeviceInput*)captureDeviceInputForCameraState:(RSVideoViewCameraState)cameraState
 {
     switch (cameraState)
@@ -385,7 +390,7 @@
 }
 
 #pragma mark - Camera Focus
--(void)cameraFocusAtPoint:(CGPoint)point
+-(void)focusCameraAtPoint:(CGPoint)point
 {
     AVCaptureDevice* captureDevice = [self captureDeviceForCameraState:self.cameraState];
     if (captureDevice)
@@ -445,6 +450,38 @@
     }
 
     return NO;
+}
+
+#pragma mark - Getters
+-(NSString *)previewLayerVideoGravity
+{
+    return _previewLayer.videoGravity;
+}
+
+-(BOOL)isVideoConnectionMirrored
+{
+    return _videoConnection.isVideoMirrored;
+}
+
+#pragma mark - enableCameraCapture
+-(BOOL)enableCameraCapture
+{
+    return self.session.isRunning;
+}
+
+-(void)setEnableCameraCapture:(BOOL)enableCameraCapture
+{
+    if (self.enableCameraCapture == enableCameraCapture)
+        return;
+    
+    if (enableCameraCapture)
+    {
+        [self.session startRunning];
+    }
+    else
+    {
+        [self.session stopRunning];
+    }
 }
 
 @end

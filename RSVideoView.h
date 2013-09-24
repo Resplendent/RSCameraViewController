@@ -24,12 +24,20 @@ typedef enum{
     AVCaptureDeviceInput* _frontCameraInput;
 }
 
+@property (nonatomic, assign) BOOL enableCameraCapture;
+
 @property (nonatomic, assign) id<RSVideoViewImageTakingDelegate> imageTakingDelegate;
 @property (nonatomic, assign) RSVideoViewCameraState cameraState;
 
+@property (nonatomic, readonly) BOOL isVideoConnectionMirrored;
+@property (nonatomic, readonly) NSString* previewLayerVideoGravity;
+
+@property (nonatomic, readonly) AVCaptureDevice* captureDeviceForCurrentCameraState;
+@property (nonatomic, readonly) AVCaptureDeviceInput* captureDeviceInputForCurrentCameraState;
+
 -(void)captureCurrentImage;
 
--(void)cameraFocusAtPoint:(CGPoint)point;
+-(void)focusCameraAtPoint:(CGPoint)point;
 
 -(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
 

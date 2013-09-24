@@ -16,44 +16,38 @@
 
 @end
 
-typedef enum{
-    RSVideoViewControllerCameraStateNone = 0,
-    RSVideoViewControllerCameraStateBackCamera = 100,
-    RSVideoViewControllerCameraStateFrontCamera,
-}RSVideoViewControllerCameraState;
 
 @interface RSVideoViewController : UIViewController
 {
-//    AVCaptureStillImageOutput* _stillOutput;
-//    AVCaptureSession* _session;
+    AVCaptureStillImageOutput* stillOutput;
+    AVCaptureSession* session;
     
-//    float _barHeight;
+    float _barHeight;
 }
 
 -(void)switchCameras;
 
-//-(void)captureImage;
+-(void)captureImageWithCompletionBlock:(void(^)(BOOL completed))completion;
 
-//-(void)cameraFocusAtPoint:(CGPoint)point;
+-(void)cameraFocusAtPoint:(CGPoint)point;
 
-//-(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
+-(BOOL)setCaptureFlashMode:(AVCaptureFlashMode)mode;
 
-//@property(nonatomic) BOOL isFront;
+@property(nonatomic) BOOL isFront;
 
 @property (nonatomic, assign) BOOL enableCameraCapture;
 
-//@property (nonatomic, assign) CGFloat topPadding;
-
 @property(nonatomic, assign)id <RSVideoViewControllerDelegate> delegate;
-@property(nonatomic, readonly) RSVideoViewControllerCameraState cameraState;
 
 @property(readonly) AVCaptureVideoPreviewLayer* previewLayer;
+
+@property(nonatomic, readonly) AVCaptureDevice* backCamera;
 
 @property(nonatomic, readonly) AVCaptureDevice* frontCamera;
 
 @property(nonatomic, readonly) AVCaptureDeviceInput* frontCameraInput;
 
-//@property(nonatomic, readonly) AVCaptureDeviceInput* backCameraInput;
+@property(nonatomic, readonly) AVCaptureDeviceInput* backCameraInput;
 
 @property(nonatomic, readonly) AVCaptureConnection* videoConnection;
 
