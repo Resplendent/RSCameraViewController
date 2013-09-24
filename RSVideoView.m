@@ -10,6 +10,8 @@
 
 #import "RUConstants.h"
 
+static NSArray* avCaptureSessionPresetsToTry;
+
 @interface RSVideoView ()
 
 @property(nonatomic, strong) AVCaptureStillImageOutput* stillOutput;;
@@ -29,6 +31,14 @@
 @end
 
 @implementation RSVideoView
+
++(void)initialize
+{
+    if (self == [RSVideoView class])
+    {
+        avCaptureSessionPresetsToTry = @[AVCaptureSessionPresetPhoto,AVCaptureSessionPresetHigh,AVCaptureSessionPresetMedium,AVCaptureSessionPresetLow,AVCaptureSessionPreset1920x1080,AVCaptureSessionPreset1280x720,AVCaptureSessionPreset640x480,AVCaptureSessionPreset352x288];
+    }
+}
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -53,8 +63,6 @@
 {
     [super layoutSubviews];
     [_previewLayer setFrame:self.previewLayerFrame];
-//    [_previewLayer setBounds:self.bounds];
-//    [_previewLayer setPosition:(CGPoint){CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds)}];
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -132,8 +140,6 @@
     if (!_session)
     {
         _session = [AVCaptureSession new];
-        if ([_session canSetSessionPreset:AVCaptureSessionPresetPhoto])
-            [_session setSessionPreset:AVCaptureSessionPresetPhoto];
     }
     
     return _session;
@@ -364,7 +370,31 @@
         }
         else
         {
-            [self.session addInput:newCurrentCaptureDeviceInput];
+            RUDLog(@"avCaptureSessionPresetsToTry: %@",avCaptureSessionPresetsToTry);
+            __block NSString* sessionPresetToUse = nil;
+            [avCaptureSessionPresetsToTry enumerateObjectsUsingBlock:^(NSString* sessionPresetToTry, NSUInteger idx, BOOL *stop) {
+                if ([self.session canSetSessionPreset:sessionPresetToTry] && [newCurrentCaptureDeviceInput.device supportsAVCaptureSessionPreset:sessionPresetToTry])
+                {
+                    sessionPresetToUse = sessionPresetToTry;
+                    *stop = YES;
+                }
+                else
+                {
+                    RUDLog(@"skip sessionPresetToTry: %@",sessionPresetToTry);
+                }
+            }];
+
+            if (sessionPresetToUse)
+            {
+                RUDLog(@"will use sessionPresetToUse: %@",sessionPresetToUse);
+                [self.session setSessionPreset:AVCaptureSessionPresetPhoto];
+                [self.session addInput:newCurrentCaptureDeviceInput];
+            }
+            else
+            {
+                RUDLog(@"no sessionPresetToUse to use for device %@ and session %@",newCurrentCaptureDeviceInput,self.session);
+            }
+
         }
     }
 }
